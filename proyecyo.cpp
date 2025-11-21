@@ -5,60 +5,6 @@
 #include <fstream>
 using namespace std;
 
-void generarPregunta(int nivel, int &respuestaCorrecta, string &pregunta) {
-    int a, b, op;
-    a = rand() % (10 * nivel) + 1;
-    b = rand() % (10 * nivel) + 1;
-    op = rand() % 4;
-
-    switch (op) {
-        case 0: 
-            respuestaCorrecta = a + b;
-            pregunta = to_string(a) + " + " + to_string(b);
-            break;
-
-        case 1: 
-            respuestaCorrecta = a - b;
-            pregunta = to_string(a) + " - " + to_string(b);
-            break;
-
-        case 2: 
-            respuestaCorrecta = a * b;
-            pregunta = to_string(a) + " * " + to_string(b);
-            break;
-
-        case 3: 
-            b = rand() % (10 * nivel) + 1;          
-            respuestaCorrecta = rand() % (10 * nivel) + 1;  
-            a = respuestaCorrecta * b;              
-            pregunta = to_string(a) + " / " + to_string(b);
-            break;
-    }
-}
-
-void guardarHistorialEnArchivo(int historial[][2], int puntajeFinal) {
-    ofstream archivo("historial.txt", ios::app);
-
-    if (!archivo) {
-        cout << "Error al abrir historial.txt\n";
-        return;
-    }
-
-    archivo << "===== NUEVA PARTIDA =====\n";
-
-    for (int i = 0; i < 7; i++) {
-        if (historial[i][0] != 0) {
-            archivo << "Nivel " << historial[i][0]
-                    << " - Aciertos: " << historial[i][1] << "\n";
-        }
-    }
-
-    archivo << "Puntaje final: " << puntajeFinal << "\n";
-    archivo << "==========================\n\n";
-
-    archivo.close();
-}
-
 int main() {
     srand(time(NULL));
 
@@ -69,95 +15,128 @@ int main() {
 
     while (true) {
         cout << "===== MENU PRINCIPAL =====" << endl;
-        cout << "1. Jugar\n";
-        cout << "2. Ver historial\n";
-        cout << "3. Salir\n";
+        cout << "1. Jugar" << endl;
+        cout << "2. Ver historial" << endl;
+        cout << "3. Salir" << endl;
         cout << "Selecciona una opcion: ";
         cin >> opcion;
 
-        switch (opcion) {
-            case 1: {
-                puntajeTotal = 0;
+        if (opcion == 1) {
 
-                for (int i = 0; i < 7; i++) {
-                    historial[i][0] = 0;
-                    historial[i][1] = 0;
-                }
+            puntajeTotal = 0;
 
-                for (int nivel = 1; nivel <= 7; nivel++) {
-                    int preguntas = 5;
-                    int aciertos = 0;
+            for (int i = 0; i < 7; i++) {
+                historial[i][0] = 0;
+                historial[i][1] = 0;
+            }
 
-                    int tiempoMax = 18 - nivel; 
+            for (int nivel = 1; nivel <= 7; nivel++) {
 
-                    cout << "=== NIVEL " << nivel << " ===" << endl;
-                    cout << "Responde " << preguntas << " preguntas.\n";
-                    cout << "Tiempo máximo: " << tiempoMax << " segundos.\n";
-                    cout << "------------------------------\n";
+                int preguntas = 5;
+                int aciertos = 0;
 
-                    auto tiempoInicio = chrono::steady_clock::now();
+                int tiempoMax = 18 - nivel;
 
-                    for (int i = 0; i < preguntas; i++) {
-                        string pregunta;
-                        int correcta, respuesta;
+                cout << "=== NIVEL " << nivel << " ===" << endl;
+                cout << "Responde " << preguntas << " preguntas." << endl;
+                cout << "Tiempo maximo: " << tiempoMax << " segundos." << endl;
+                cout << "------------------------------" << endl;
 
-                        generarPregunta(nivel, correcta, pregunta);
+                auto tiempoInicio = chrono::steady_clock::now();
 
-                        cout << "Pregunta " << i + 1 << ": " << pregunta << " = ";
-                        cin >> respuesta;
+                for (int i = 0; i < preguntas; i++) {
 
-                        if (respuesta == correcta) {
-                            aciertos++;
-                            puntajeTotal += 10 * nivel;
-                            cout << "? Correcto!\n";
-                        } else {
-                            cout << "? Incorrecto. Resp correcta: " << correcta << "\n";
-                        }
+                    int a, b, op, correcta, respuesta;
+                    string pregunta;
 
-                        auto tiempoActual = chrono::steady_clock::now();
-                        double segundos = chrono::duration_cast<chrono::seconds>(tiempoActual - tiempoInicio).count();
+                    a = rand() % (10 * nivel) + 1;
+                    b = rand() % (10 * nivel) + 1;
+                    op = rand() % 4;
 
-                        if (segundos > tiempoMax) {
-                            cout << "\n? Tiempo agotado!\n";
-                            break;
-                        }
+                    if (op == 0) {
+                        correcta = a + b;
+                        pregunta = to_string(a) + " + " + to_string(b);
+                    } else if (op == 1) {
+                        correcta = a - b;
+                        pregunta = to_string(a) + " - " + to_string(b);
+                    } else if (op == 2) {
+                        correcta = a * b;
+                        pregunta = to_string(a) + " * " + to_string(b);
+                    } else {
+                        b = rand() % (10 * nivel) + 1;
+                        correcta = rand() % (10 * nivel) + 1;
+                        a = correcta * b;
+                        pregunta = to_string(a) + " / " + to_string(b);
                     }
 
-                    historial[nivel - 1][0] = nivel;
-                    historial[nivel - 1][1] = aciertos;
+                    cout << "Pregunta " << i + 1 << ": " << pregunta << " = ";
+                    cin >> respuesta;
 
-                    cout << "Aciertos en este nivel: " << aciertos << "\n";
+                    if (respuesta == correcta) {
+                        aciertos++;
+                        puntajeTotal += 10 * nivel;
+                        cout << "✔ Correcto!" << endl;
+                    } else {
+                        cout << "✘ Incorrecto. Resp correcta: " << correcta << endl;
+                    }
 
-                    if (aciertos < 3) {
-                        cout << "No alcanzaste los aciertos necesarios. Fin del juego.\n";
+                    auto tiempoActual = chrono::steady_clock::now();
+                    double segundos = chrono::duration_cast<chrono::seconds>(tiempoActual - tiempoInicio).count();
+
+                    if (segundos > tiempoMax) {
+                        cout << endl << "⏳ Tiempo agotado!" << endl;
                         break;
                     }
                 }
 
-                cout << "\nPuntaje final: " << puntajeTotal << "\n";
+                historial[nivel - 1][0] = nivel;
+                historial[nivel - 1][1] = aciertos;
 
-                guardarHistorialEnArchivo(historial, puntajeTotal);
-                cout << "Historial guardado en historial.txt\n";
+                cout << "Aciertos en este nivel: " << aciertos << endl;
 
-                break;
+                if (aciertos < 3) {
+                    cout << "No alcanzaste los aciertos necesarios. Fin del juego." << endl;
+                    break;
+                }
             }
 
-            case 2:
-                cout << "\n=== HISTORIAL (Última partida jugada) ===\n";
-                for (int i = 0; i < 7; i++) {
-                    if (historial[i][0] != 0) {
-                        cout << "Nivel " << historial[i][0]
-                             << ": " << historial[i][1] << " aciertos\n";
-                    }
+            cout << endl << "Puntaje final: " << puntajeTotal << endl;
+
+            ofstream archivo("historial.txt", ios::app);
+            archivo << "===== NUEVA PARTIDA =====" << endl;
+
+            for (int i = 0; i < 7; i++) {
+                if (historial[i][0] != 0) {
+                    archivo << "Nivel " << historial[i][0]
+                            << " - Aciertos: " << historial[i][1] << endl;
                 }
-                break;
+            }
 
-            case 3:
-                cout << "Gracias por jugar!\n";
-                return 0;
+            archivo << "Puntaje final: " << puntajeTotal << endl;
+            archivo << "==========================" << endl << endl;
 
-            default:
-                cout << "Opcion invalida.\n";
+            archivo.close();
+
+            cout << "Historial guardado en historial.txt" << endl;
+        }
+
+        else if (opcion == 2) {
+            cout << endl << "=== HISTORIAL (Ultima partida jugada) ===" << endl;
+            for (int i = 0; i < 7; i++) {
+                if (historial[i][0] != 0) {
+                    cout << "Nivel " << historial[i][0]
+                         << ": " << historial[i][1] << " aciertos" << endl;
+                }
+            }
+        }
+
+        else if (opcion == 3) {
+            cout << "Gracias por jugar!" << endl;
+            return 0;
+        }
+
+        else {
+            cout << "Opcion invalida." << endl;
         }
     }
 
